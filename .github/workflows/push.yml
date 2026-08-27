@@ -1,0 +1,19 @@
+name: core-nestjs
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish-gpr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+      - run: npm install
+      - run: tsc && npm publish --access public
+    env:
+      NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

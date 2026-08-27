@@ -1,0 +1,54 @@
+{
+  "name": "@mckit/core-nestjs",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc",
+    "build-and-publish": "tsc && npm publish"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matiascamiletti/mc-core-nestjs.git"
+  },
+  "keywords": [
+    "core-nestjs"
+  ],
+  "author": "Matias Camiletti",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/matiascamiletti/mc-core-nestjs/issues"
+  },
+  "homepage": "https://github.com/matiascamiletti/mc-core-nestjs#readme",
+  "dependencies": {},
+  "peerDependencies": {},
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.1.0",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.11",
+    "typescript": "^5.9.3"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node"
+  }
+}
