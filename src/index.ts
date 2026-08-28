@@ -1,2 +1,2 @@
-export * from './lib/odata-builder';
-export * from './lib/odata-response';
+export * from './services/dynamic-object.service';
+export * from './services/dynamic-object.types';
