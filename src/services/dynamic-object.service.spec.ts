@@ -69,6 +69,31 @@ describe('DynamicObjectService', () => {
             expect(DynamicObjectService.get('user.profile.tags', mockData, DynamicObjectType.ARRAY)).toEqual(['admin', 'dev']);
             expect(DynamicObjectService.get('user.createdDate', mockData, DynamicObjectType.DATE)).toEqual(new Date('2026-01-15T10:00:00.000Z'));
         });
+        it('debe mantener las variables si no se encuentran en el source cuando notReplaceIfNotFound es true', () => {
+            const singleResult = DynamicObjectService.get(
+                '{{missing.prop}}',
+                mockData,
+                DynamicObjectType.STRING,
+                { notReplaceIfNotFound: true }
+            );
+            expect(singleResult).toBe('{{missing.prop}}');
+
+            const multiResult = DynamicObjectService.get(
+                'Hola {{user.profile.firstName}}, tu código es {{missing.code}} y tu estado es {{missing.status}}',
+                mockData,
+                DynamicObjectType.STRING,
+                { notReplaceIfNotFound: true }
+            );
+            expect(multiResult).toBe('Hola John, tu código es {{missing.code}} y tu estado es {{missing.status}}');
+
+            const nullSourceResult = DynamicObjectService.get(
+                'Hola {{name}}',
+                null,
+                DynamicObjectType.STRING,
+                { notReplaceIfNotFound: true }
+            );
+            expect(nullSourceResult).toBe('Hola {{name}}');
+        });
     });
 
     describe('interpolate()', () => {
@@ -76,6 +101,18 @@ describe('DynamicObjectService', () => {
             const template = 'Hola {{ a[1].name }}, tienes {{ a[1].age }} años.';
             const result = DynamicObjectService.interpolate(template, mockData);
             expect(result).toBe('Hola Lucas, tienes 25 años.');
+        });
+
+        it('debe mantener las variables no encontradas cuando notReplaceIfNotFound es true', () => {
+            const template = 'Hola {{ a[0].name }}, tu orden es {{ order.id }}.';
+            const result = DynamicObjectService.interpolate(template, mockData, { notReplaceIfNotFound: true });
+            expect(result).toBe('Hola Matias, tu orden es {{ order.id }}.');
+        });
+
+        it('debe reemplazar con vacío por defecto cuando notReplaceIfNotFound no está activo', () => {
+            const template = 'Hola {{ a[0].name }}, tu orden es {{ order.id }}.';
+            const result = DynamicObjectService.interpolate(template, mockData);
+            expect(result).toBe('Hola Matias, tu orden es .');
         });
     });
 

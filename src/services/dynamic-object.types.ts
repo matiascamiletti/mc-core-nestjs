@@ -22,4 +22,5 @@ export type DynamicTypeMapping<T = any> = {
 export interface DynamicGetOptions<T = any> {
     defaultValue?: T;
     trimSpaces?: boolean;
+    notReplaceIfNotFound?: boolean;
 }

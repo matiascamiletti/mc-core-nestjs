@@ -16,7 +16,21 @@ export class DynamicObjectService {
         responseAs: T = DynamicObjectType.RAW as T,
         options?: DynamicGetOptions<DynamicTypeMapping[T]>
     ): DynamicTypeMapping[T] {
-        if (!path || !source || typeof source !== 'object') {
+        if (!path) {
+            return (options?.defaultValue !== undefined ? options.defaultValue : this.toAsType(undefined, responseAs)) as DynamicTypeMapping[T];
+        }
+
+        if (!source || typeof source !== 'object') {
+            if (options?.notReplaceIfNotFound) {
+                const trimmedPath = path.trim();
+                const hasInterpolation = /\{\{\s*([^}]+?)\s*\}\}/.test(trimmedPath);
+                if (hasInterpolation) {
+                    return (options?.defaultValue !== undefined
+                        ? options.defaultValue
+                        : this.toAsType(trimmedPath, responseAs)
+                    ) as DynamicTypeMapping[T];
+                }
+            }
             return (options?.defaultValue !== undefined ? options.defaultValue : this.toAsType(undefined, responseAs)) as DynamicTypeMapping[T];
         }
 
@@ -27,7 +41,7 @@ export class DynamicObjectService {
         const hasInterpolation = /\{\{\s*([^}]+?)\s*\}\}/.test(trimmedPath);
 
         if (hasInterpolation && !singleMustacheMatch) {
-            const interpolated = this.interpolate(trimmedPath, source);
+            const interpolated = this.interpolate(trimmedPath, source, options);
             return (interpolated !== undefined && interpolated !== ''
                 ? this.toAsType(interpolated, responseAs)
                 : (options?.defaultValue !== undefined ? options.defaultValue : this.toAsType(interpolated, responseAs))
@@ -53,8 +67,13 @@ export class DynamicObjectService {
             current = current[key];
         }
 
-        if (current === undefined && options?.defaultValue !== undefined) {
-            return options.defaultValue;
+        if (current === undefined || (current === null && options?.notReplaceIfNotFound && singleMustacheMatch)) {
+            if (options?.defaultValue !== undefined && current === undefined) {
+                return options.defaultValue;
+            }
+            if (options?.notReplaceIfNotFound && singleMustacheMatch) {
+                return this.toAsType(trimmedPath, responseAs) as DynamicTypeMapping[T];
+            }
         }
 
         return this.toAsType(current, responseAs) as DynamicTypeMapping[T];
@@ -64,11 +83,21 @@ export class DynamicObjectService {
      * Interpola múltiples variables dentro de un template string.
      * Ejemplo: "Esto es un texto y el nombre es {{a[0].name}}"
      */
-    public static interpolate(template: string, context: Record<string, any>): string {
+    public static interpolate(
+        template: string,
+        context: Record<string, any>,
+        options?: DynamicGetOptions
+    ): string {
         if (!template || !context || typeof context !== 'object') return template || '';
-        return template.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (_, pathExpression) => {
+        return template.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (match, pathExpression) => {
             const val = this.get(pathExpression.trim(), context, DynamicObjectType.RAW);
             if (val === undefined || val === null) {
+                if (options?.notReplaceIfNotFound) {
+                    return match;
+                }
+                if (options?.defaultValue !== undefined) {
+                    return String(options.defaultValue);
+                }
                 return '';
             }
             if (typeof val === 'object') {

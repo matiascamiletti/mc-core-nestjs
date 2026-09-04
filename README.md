@@ -99,6 +99,14 @@ const text = DynamicObjectService.interpolate(
     payload
 );
 // "Esto es un texto y el nombre es 101"
+
+// Mantener variables sin reemplazar si no se encuentran en el source:
+const partialText = DynamicObjectService.interpolate(
+    'Hola {{user.firstName}}, tu código es {{coupon.code}}',
+    payload,
+    { notReplaceIfNotFound: true }
+);
+// "Hola Matias, tu código es {{coupon.code}}"
 ```
 
 ---
@@ -156,10 +164,18 @@ DynamicObjectService.toAsType('2026-01-15T10:00:00Z', DynamicObjectType.DATE); /
 | `DATE` | `Date \| null` | Parsea fecha válida o devuelve `null`. |
 | `RAW` | `any` | Devuelve el valor original sin transformar. |
 
+### `DynamicGetOptions` (Interface)
+
+| Propiedad | Tipo | Descripción |
+| :--- | :--- | :--- |
+| `defaultValue` | `T` | Valor por defecto en caso de que la propiedad no exista o sea `undefined`. |
+| `trimSpaces` | `boolean` | Opción para sanitizar espacios en blanco. |
+| `notReplaceIfNotFound` | `boolean` | Si es `true`, conserva los placeholders de las variables (ej: `{{variable}}`) cuando no se encuentran en el `source` o `context`. |
+
 ### `DynamicObjectService` (Métodos)
 
-- **`get(path, source, responseAs?, options?)`**: Obtiene el valor o interpola la plantilla con soporte de fallback.
-- **`interpolate(template, context)`**: Reemplaza todas las etiquetas `{{ path }}` por su valor resuelto en `context`.
+- **`get(path, source, responseAs?, options?)`**: Obtiene el valor o interpola la plantilla con soporte de fallback y `notReplaceIfNotFound`.
+- **`interpolate(template, context, options?)`**: Reemplaza todas las etiquetas `{{ path }}` por su valor resuelto en `context`, con opción de mantenerlas mediante `notReplaceIfNotFound`.
 - **`set(path, value, target)`**: Asigna un valor en una ruta anidada creando objetos o arreglos según corresponda.
 - **`toAsType(value, type)`**: Convierte cualquier valor al tipo especificado de forma segura.
 
